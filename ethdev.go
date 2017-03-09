@@ -6,11 +6,16 @@ package dpdk
 
 #include <rte_config.h>
 #include <rte_ethdev.h>
+#include <wrap.h>
+
+const uint8_t SYMMETRICAL_HASH_KEY[] = {0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A};
+
 */
 import "C"
 
 import (
 	"fmt"
+	"math"
 	"unsafe"
 )
 
@@ -271,4 +276,40 @@ func RteEthMacAddr(port_id uint) string {
 	var addr C.struct_ether_addr
 	C.rte_eth_macaddr_get(C.uint8_t(port_id), &addr)
 	return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", addr.addr_bytes[0], addr.addr_bytes[1], addr.addr_bytes[2], addr.addr_bytes[3], addr.addr_bytes[4], addr.addr_bytes[5])
+}
+
+func RteEthRssFlowByIP() *RteEthConf {
+	eth_conf := &RteEthConf{}
+
+	conf := (*C.struct_rte_eth_conf)(unsafe.Pointer(eth_conf))
+	conf.rxmode.mq_mode = C.ETH_MQ_RX_RSS
+	conf.rx_adv_conf.rss_conf.rss_hf = C.ETH_RSS_IP
+	conf.rx_adv_conf.rss_conf.rss_key = (*C.uint8_t)(&C.SYMMETRICAL_HASH_KEY[0])
+
+	return eth_conf
+}
+
+func RteEthInitRetaTable(port_id uint, queues_count uint) int {
+	var dev_info C.struct_rte_eth_dev_info
+	C.rte_eth_dev_info_get(C.uint8_t(port_id), &dev_info)
+
+	var reta_conf [512]C.struct_rte_eth_rss_reta_entry64
+
+	for group := 0; group < int(dev_info.reta_size); group++ {
+		reta_conf[group/C.RTE_RETA_GROUP_SIZE].mask = C.uint64_t(math.MaxUint64)
+
+		for i := uint(0); i < C.RTE_RETA_GROUP_SIZE; i += queues_count {
+			for q := uint(0); q < queues_count && i+q < C.RTE_RETA_GROUP_SIZE; q++ {
+				reta_conf[group/C.RTE_RETA_GROUP_SIZE].reta[i+q] = C.uint16_t(q)
+			}
+		}
+	}
+
+	result := C.rte_eth_dev_rss_reta_update(
+		C.uint8_t(port_id),
+		(*C.struct_rte_eth_rss_reta_entry64)(unsafe.Pointer(&reta_conf[0])),
+		dev_info.reta_size,
+	)
+
+	return int(result)
 }

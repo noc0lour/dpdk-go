@@ -125,3 +125,7 @@ func RtePktMbufDataLen(buf *RteMbuf) uint16 {
 	mbuf := (*C.struct_rte_mbuf)(unsafe.Pointer(buf))
 	return uint16(mbuf.data_len)
 }
+
+func RtePktMbufAppend(buf *RteMbuf, size uint) unsafe.Pointer {
+	return unsafe.Pointer(C.rte_pktmbuf_append(buf, C.uint16_t(size)))
+}
