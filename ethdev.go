@@ -9,6 +9,67 @@ package dpdk
 #include <wrap.h>
 
 const uint8_t SYMMETRICAL_HASH_KEY[] = {0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A};
+const uint8_t SIMPLE_SYMMETRICAL_HASH_KEY[] = {0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01};
+
+static int update_rss_flow(uint8_t port_id, uint32_t flow_type, uint32_t flow_field, enum rte_filter_input_set_op operation)
+{
+	struct rte_eth_hash_filter_info info;
+	memset(&info, 0, sizeof(info));
+
+	info.info_type = RTE_ETH_HASH_FILTER_INPUT_SET_SELECT;
+	info.info.input_set_conf.flow_type = flow_type;
+	info.info.input_set_conf.field[0] = flow_field;
+	info.info.input_set_conf.inset_size = 1;
+
+	info.info.input_set_conf.op = operation;
+	int result = rte_eth_dev_filter_ctrl(port_id, RTE_ETH_FILTER_HASH, RTE_ETH_FILTER_SET, &info);
+
+	return result;
+}
+
+static int enable_symmetrical_rss_hash_for_flow(uint8_t port_id, uint32_t flow_type)
+{
+	if (rte_eth_dev_filter_supported(port_id, RTE_ETH_FILTER_HASH) < 0) {
+		return -1000;
+	}
+
+	struct rte_eth_hash_filter_info info;
+	memset(&info, 0, sizeof(info));
+
+	info.info_type = RTE_ETH_HASH_FILTER_GLOBAL_CONFIG;
+	info.info.global_conf.hash_func = RTE_ETH_HASH_FUNCTION_DEFAULT;
+
+	uint32_t idx, offset;
+
+	idx = flow_type / (CHAR_BIT * sizeof(uint32_t));
+	offset = flow_type % (CHAR_BIT * sizeof(uint32_t));
+	info.info.global_conf.valid_bit_mask[idx] |= (1UL << offset);
+
+	// enable
+	info.info.global_conf.sym_hash_enable_mask[idx] |= (1UL << offset);
+
+	int result = rte_eth_dev_filter_ctrl(port_id, RTE_ETH_FILTER_HASH, RTE_ETH_FILTER_SET, &info);
+
+	return result;
+}
+
+
+static int enable_symmetrical_rss_hash_for_port(uint8_t port_id)
+{
+	if (rte_eth_dev_filter_supported(port_id, RTE_ETH_FILTER_HASH) < 0) {
+		return -1000;
+	}
+
+	struct rte_eth_hash_filter_info info;
+	memset(&info, 0, sizeof(info));
+
+	info.info_type = RTE_ETH_HASH_FILTER_SYM_HASH_ENA_PER_PORT;
+	info.info.enable = 1;
+
+	int result = rte_eth_dev_filter_ctrl(port_id, RTE_ETH_FILTER_HASH, RTE_ETH_FILTER_SET, &info);
+
+	return result;
+}
 
 */
 import "C"
@@ -283,10 +344,60 @@ func RteEthRssFlowByIP() *RteEthConf {
 
 	conf := (*C.struct_rte_eth_conf)(unsafe.Pointer(eth_conf))
 	conf.rxmode.mq_mode = C.ETH_MQ_RX_RSS
-	conf.rx_adv_conf.rss_conf.rss_hf = C.ETH_RSS_IP
+	conf.rx_adv_conf.rss_conf.rss_hf = C.ETH_RSS_TCP
 	conf.rx_adv_conf.rss_conf.rss_key = (*C.uint8_t)(&C.SYMMETRICAL_HASH_KEY[0])
 
 	return eth_conf
+}
+
+func RteEthSetRssFlowByTCP(port_id uint) int {
+	conf := &C.struct_rte_eth_rss_conf{}
+
+	conf.rss_hf = C.ETH_RSS_NONFRAG_IPV4_TCP
+	conf.rss_key = (*C.uint8_t)(&C.SYMMETRICAL_HASH_KEY[0])
+
+	result := C.rte_eth_dev_rss_hash_update(C.uint8_t(port_id), conf)
+	return int(result)
+}
+
+func RteEthSetRssFlowByTCPForIntel710(port_id uint) int {
+	if res := RteEthSetRssFlowByTCP(port_id); res < 0 {
+		return int(res)
+	}
+
+	if res := C.update_rss_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_NONFRAG_IPV4_TCP, C.RTE_ETH_INPUT_SET_L3_SRC_IP4, C.RTE_ETH_INPUT_SET_SELECT); res < 0 {
+		return int(res)
+	}
+
+	if res := C.update_rss_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_NONFRAG_IPV4_TCP, C.RTE_ETH_INPUT_SET_L3_DST_IP4, C.RTE_ETH_INPUT_SET_ADD); res < 0 {
+		return int(res)
+	}
+
+	if res := C.update_rss_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_FRAG_IPV4, C.RTE_ETH_INPUT_SET_L3_SRC_IP4, C.RTE_ETH_INPUT_SET_SELECT); res < 0 {
+		return int(res)
+	}
+
+	if res := C.update_rss_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_FRAG_IPV4, C.RTE_ETH_INPUT_SET_L3_DST_IP4, C.RTE_ETH_INPUT_SET_ADD); res < 0 {
+		return int(res)
+	}
+
+	if res := C.enable_symmetrical_rss_hash_for_port(C.uint8_t(port_id)); res < 0 {
+		return int(res)
+	}
+
+	if res := C.enable_symmetrical_rss_hash_for_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_NONFRAG_IPV4_TCP); res < 0 {
+		return int(res)
+	}
+
+	if res := C.enable_symmetrical_rss_hash_for_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_FRAG_IPV4); res < 0 {
+		return int(res)
+	}
+
+	if res := C.enable_symmetrical_rss_hash_for_flow(C.uint8_t(port_id), C.RTE_ETH_FLOW_NONFRAG_IPV4_OTHER); res < 0 {
+		return int(res)
+	}
+
+	return 0
 }
 
 func RteEthInitRetaTable(port_id uint, queues_count uint) int {
