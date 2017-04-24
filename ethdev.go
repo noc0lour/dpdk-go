@@ -216,7 +216,6 @@ const (
 	RTE_ETH_EVENT_MAX      = int(C.RTE_ETH_EVENT_MAX)
 )
 
-type RteEthStats C.struct_rte_eth_stats
 type RteEthLink C.struct_rte_eth_link
 type RteEthThresh C.struct_rte_eth_thresh
 type RteEthRxMode C.struct_rte_eth_rxmode
@@ -242,7 +241,17 @@ type RteEthDcbTcQueueMapping C.struct_rte_eth_dcb_tc_queue_mapping
 type RteEthDcbInfo C.struct_rte_eth_dcb_info
 type RteEthAddr C.struct_ether_addr
 
-//
+type RteEthStats struct {
+	PacketsReceived          uint64
+	PacketsTransmitted       uint64
+	BytesReceived            uint64
+	BytesTransmitted         uint64
+	PacketsMissedByQueue     uint64
+	PacketsReceivedErroneous uint64
+	PacketsTrasmitErrors     uint64
+	MbufAllocationFailures   uint64
+}
+
 func RteEthDevCount() uint {
 	return uint(C.rte_eth_dev_count())
 }
@@ -423,4 +432,26 @@ func RteEthInitRetaTable(port_id uint, queues_count uint) int {
 	)
 
 	return int(result)
+}
+
+func RteEthGetStats(port_id uint) RteEthStats {
+	cstats := C.struct_rte_eth_stats{}
+	C.rte_eth_stats_get(C.uint8_t(port_id), &cstats)
+
+	stats := RteEthStats{
+		PacketsReceived:          uint64(cstats.ipackets),
+		PacketsTransmitted:       uint64(cstats.opackets),
+		BytesReceived:            uint64(cstats.ibytes),
+		BytesTransmitted:         uint64(cstats.obytes),
+		PacketsMissedByQueue:     uint64(cstats.imissed),
+		PacketsReceivedErroneous: uint64(cstats.ierrors),
+		PacketsTrasmitErrors:     uint64(cstats.oerrors),
+		MbufAllocationFailures:   uint64(cstats.rx_nombuf),
+	}
+
+	return stats
+}
+
+func RteEthClearStats(port_id uint) {
+	C.rte_eth_stats_reset(C.uint8_t(port_id))
 }
