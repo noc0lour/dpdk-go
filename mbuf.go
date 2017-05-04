@@ -127,5 +127,5 @@ func RtePktMbufDataLen(buf *RteMbuf) uint16 {
 }
 
 func RtePktMbufAppend(buf *RteMbuf, size uint) unsafe.Pointer {
-	return unsafe.Pointer(C.rte_pktmbuf_append(buf, C.uint16_t(size)))
+	return unsafe.Pointer(C.rte_pktmbuf_append((*C.struct_rte_mbuf)(unsafe.Pointer(buf)), C.uint16_t(size)))
 }
