@@ -202,12 +202,12 @@ const (
 )
 
 /* enum rte_eth_dev_type */
-const (
-	RTE_ETH_DEV_UNKNOWN = int(C.RTE_ETH_DEV_UNKNOWN)
-	RTE_ETH_DEV_PCI     = int(C.RTE_ETH_DEV_PCI)
-	RTE_ETH_DEV_VIRTUAL = int(C.RTE_ETH_DEV_VIRTUAL)
-	RTE_ETH_DEV_MAX     = int(C.RTE_ETH_DEV_MAX)
-)
+// const (
+// RTE_ETH_DEV_UNKNOWN = int(C.RTE_ETH_DEV_UNKNOWN)
+// RTE_ETH_DEV_PCI     = int(C.RTE_ETH_DEV_PCI)
+// RTE_ETH_DEV_VIRTUAL = int(C.RTE_ETH_DEV_VIRTUAL)
+// RTE_ETH_DEV_MAX     = int(C.RTE_ETH_DEV_MAX)
+// )
 
 /* enum rte_eth_event_type */
 const (

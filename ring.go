@@ -51,16 +51,12 @@ func (r *RteRing) Free() {
 	C.rte_ring_free((*C.struct_rte_ring)(r))
 }
 
-func (r *RteRing) SetWaterMark(count uint) int {
-	return int(C.rte_ring_set_water_mark((*C.struct_rte_ring)(r), C.unsigned(count)))
-}
-
 func (r *RteRing) EnqueueBurst(tbl *unsafe.Pointer, n uint) uint {
-	return uint(C.rte_ring_enqueue_burst((*C.struct_rte_ring)(r), tbl, C.unsigned(n)))
+	return uint(C.rte_ring_enqueue_burst((*C.struct_rte_ring)(r), tbl, C.unsigned(n), nil))
 }
 
 func (r *RteRing) EnqueueBulk(tbl *unsafe.Pointer, n uint) int {
-	return int(C.rte_ring_enqueue_bulk((*C.struct_rte_ring)(r), tbl, C.unsigned(n)))
+	return int(C.rte_ring_enqueue_bulk((*C.struct_rte_ring)(r), tbl, C.unsigned(n), nil))
 }
 
 func (r *RteRing) Enqueue(obj unsafe.Pointer) int {
@@ -68,11 +64,11 @@ func (r *RteRing) Enqueue(obj unsafe.Pointer) int {
 }
 
 func (r *RteRing) DequeueBurst(tbl *unsafe.Pointer, n uint) uint {
-	return uint(C.rte_ring_dequeue_burst((*C.struct_rte_ring)(r), tbl, C.unsigned(n)))
+	return uint(C.rte_ring_dequeue_burst((*C.struct_rte_ring)(r), tbl, C.unsigned(n), nil))
 }
 
 func (r *RteRing) DequeueBulk(tbl *unsafe.Pointer, n uint) int {
-	return int(C.rte_ring_dequeue_bulk((*C.struct_rte_ring)(r), tbl, C.unsigned(n)))
+	return int(C.rte_ring_dequeue_bulk((*C.struct_rte_ring)(r), tbl, C.unsigned(n), nil))
 }
 
 func (r *RteRing) Dequeue(obj *unsafe.Pointer) int {
