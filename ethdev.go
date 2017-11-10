@@ -455,3 +455,7 @@ func RteEthGetStats(port_id uint) RteEthStats {
 func RteEthClearStats(port_id uint) {
 	C.rte_eth_stats_reset(C.uint8_t(port_id))
 }
+
+func RteEthDevSetMTU(port_id, mtu uint) uint {
+	return uint(C.rte_eth_dev_set_mtu(C.uint8_t(port_id), C.uint16_t(mtu)))
+}
