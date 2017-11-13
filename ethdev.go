@@ -459,3 +459,15 @@ func RteEthClearStats(port_id uint) {
 func RteEthDevSetMTU(port_id, mtu uint) int {
 	return int(C.rte_eth_dev_set_mtu(C.uint8_t(port_id), C.uint16_t(mtu)))
 }
+
+func RteEthDevGetNameByPort(port_id uint) (string, int) {
+	var bytes [64]byte
+
+	result := C.rte_eth_dev_get_name_by_port(C.uint8_t(port_id), (*C.char)(unsafe.Pointer(&bytes[0])))
+
+	if result != 0 {
+		return "", int(result)
+	}
+
+	return string(bytes[:]), 0
+}
