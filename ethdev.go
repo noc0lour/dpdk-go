@@ -202,12 +202,12 @@ const (
 )
 
 /* enum rte_eth_dev_type */
-// const (
-// RTE_ETH_DEV_UNKNOWN = int(C.RTE_ETH_DEV_UNKNOWN)
-// RTE_ETH_DEV_PCI     = int(C.RTE_ETH_DEV_PCI)
-// RTE_ETH_DEV_VIRTUAL = int(C.RTE_ETH_DEV_VIRTUAL)
-// RTE_ETH_DEV_MAX     = int(C.RTE_ETH_DEV_MAX)
-// )
+const (
+	RTE_ETH_DEV_UNKNOWN = int(C.RTE_ETH_DEV_UNKNOWN)
+	RTE_ETH_DEV_PCI     = int(C.RTE_ETH_DEV_PCI)
+	RTE_ETH_DEV_VIRTUAL = int(C.RTE_ETH_DEV_VIRTUAL)
+	RTE_ETH_DEV_MAX     = int(C.RTE_ETH_DEV_MAX)
+)
 
 /* enum rte_eth_event_type */
 const (
@@ -454,4 +454,20 @@ func RteEthGetStats(port_id uint) RteEthStats {
 
 func RteEthClearStats(port_id uint) {
 	C.rte_eth_stats_reset(C.uint8_t(port_id))
+}
+
+func RteEthDevSetMTU(port_id, mtu uint) int {
+	return int(C.rte_eth_dev_set_mtu(C.uint8_t(port_id), C.uint16_t(mtu)))
+}
+
+func RteEthDevGetNameByPort(port_id uint) (string, int) {
+	var bytes [64]byte
+
+	result := C.rte_eth_dev_get_name_by_port(C.uint8_t(port_id), (*C.char)(unsafe.Pointer(&bytes[0])))
+
+	if result != 0 {
+		return "", int(result)
+	}
+
+	return string(bytes[:]), 0
 }
