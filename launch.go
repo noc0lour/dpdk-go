@@ -2,7 +2,7 @@ package dpdk
 
 /*
 #cgo CFLAGS: -m64 -pthread -O3 -march=native -I/usr/local/include/dpdk
-#cgo LDFLAGS: -L/usr/local/lib -ldpdk -lz -lrt -lm -ldl -lfuse
+#cgo LDFLAGS: -L/usr/local/lib -ldpdk -lz -lrt -lm -ldl -lfuse -lnuma
 
 extern int go_remote_launch(void *);
 extern int go_mp_remote_launch(void *);
