@@ -11,7 +11,6 @@ import "C"
 import "unsafe"
 
 const (
-	PKT_RX_VLAN_PKT      = uint64(C.PKT_RX_VLAN_PKT)
 	PKT_RX_RSS_HASH      = uint64(C.PKT_RX_RSS_HASH)
 	PKT_RX_FDIR          = uint64(C.PKT_RX_FDIR)
 	PKT_RX_L4_CKSUM_BAD  = uint64(C.PKT_RX_L4_CKSUM_BAD)
@@ -25,7 +24,6 @@ const (
 	PKT_RX_IEEE1588_TMST                = uint64(C.PKT_RX_IEEE1588_TMST)
 	PKT_RX_FDIR_ID                      = uint64(C.PKT_RX_FDIR_ID)
 	PKT_RX_FDIR_FLX                     = uint64(C.PKT_RX_FDIR_FLX)
-	PKT_RX_QINQ_PKT                     = uint64(C.PKT_RX_QINQ_PKT)
 	PKT_TX_QINQ_PKT                     = uint64(C.PKT_TX_QINQ_PKT)
 	PKT_TX_TCP_SEG                      = uint64(C.PKT_TX_TCP_SEG)
 	PKT_TX_IEEE1588_TMST                = uint64(C.PKT_TX_IEEE1588_TMST)
