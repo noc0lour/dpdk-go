@@ -107,6 +107,19 @@ func RtePktMbufAlloc(mp *RteMemPool) *RteMbuf {
 	return (*RteMbuf)(unsafe.Pointer(C.rte_pktmbuf_alloc((*C.struct_rte_mempool)(unsafe.Pointer(mp)))))
 }
 
+// RtePktMbufAllocBulk allocates several new mbufs from a mempool
+func RtePktMbufAllocBulk(mp *RteMemPool, count int) []*RteMbuf, int {
+	mbufs := make([]*RteMbuf, count)
+
+	result := C.rte_pktmbuf_alloc_bulk(
+		(**C.struct_rte_mempool)(unsafe.Pointer(mp)),
+		(**C.struct_rte_mbuf)(unsafe.Pointer(mbufs)),
+		C.uint16_t(count)
+	)
+
+	return mbufs, int(result)
+}
+
 // RtePktMbufFree frees a packet mbuf back into its original mempool
 func RtePktMbufFree(buf *RteMbuf) {
 	C.rte_pktmbuf_free((*C.struct_rte_mbuf)(unsafe.Pointer(buf)))
