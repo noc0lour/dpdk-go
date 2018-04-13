@@ -249,22 +249,22 @@ func RteEthDevCount() uint {
 
 func RteEthDevAttach(devargs string, port_id *uint) int {
 	return int(C.rte_eth_dev_attach(C.CString(devargs),
-		(*C.uint8_t)(unsafe.Pointer((port_id)))))
+		(*C.uint16_t)(unsafe.Pointer((port_id)))))
 }
 
 func RteEthDevDetach(port_id uint, devname string) int {
-	return int(C.rte_eth_dev_detach(C.uint8_t(port_id), C.CString(devname)))
+	return int(C.rte_eth_dev_detach(C.uint16_t(port_id), C.CString(devname)))
 }
 
 func RteEthDevConfigure(port_id, nb_rx_queue, nb_tx_queue uint, eth_conf *RteEthConf) int {
-	return int(C.rte_eth_dev_configure(C.uint8_t(port_id),
+	return int(C.rte_eth_dev_configure(C.uint16_t(port_id),
 		C.uint16_t(nb_rx_queue), C.uint16_t(nb_tx_queue),
 		(*C.struct_rte_eth_conf)(eth_conf)))
 }
 
 func RteEthRxQueueSetup(port_id, rx_queue_id, nb_rx_desc, socket_id uint,
 	rx_conf *RteEthRxConf, mb_pool *RteMemPool) int {
-	return int(C.rte_eth_rx_queue_setup(C.uint8_t(port_id),
+	return int(C.rte_eth_rx_queue_setup(C.uint16_t(port_id),
 		C.uint16_t(rx_queue_id), C.uint16_t(nb_rx_desc),
 		C.unsigned(socket_id), (*C.struct_rte_eth_rxconf)(rx_conf),
 		(*C.struct_rte_mempool)(mb_pool)))
@@ -272,70 +272,70 @@ func RteEthRxQueueSetup(port_id, rx_queue_id, nb_rx_desc, socket_id uint,
 
 func RteEthTxQueueSetup(port_id, tx_queue_id, nb_tx_desc, socket_id uint,
 	tx_conf *RteEthTxConf) int {
-	return int(C.rte_eth_tx_queue_setup(C.uint8_t(port_id),
+	return int(C.rte_eth_tx_queue_setup(C.uint16_t(port_id),
 		C.uint16_t(tx_queue_id), C.uint16_t(nb_tx_desc),
 		C.unsigned(socket_id), (*C.struct_rte_eth_txconf)(tx_conf)))
 }
 
 func RteEthDevStart(port_id uint) int {
-	return int(C.rte_eth_dev_start(C.uint8_t(port_id)))
+	return int(C.rte_eth_dev_start(C.uint16_t(port_id)))
 }
 
 func RteEthDevStop(port_id uint) {
-	C.rte_eth_dev_stop(C.uint8_t(port_id))
+	C.rte_eth_dev_stop(C.uint16_t(port_id))
 }
 
 func RteEthDevSetLinkUp(port_id uint) int {
-	return int(C.rte_eth_dev_set_link_up(C.uint8_t(port_id)))
+	return int(C.rte_eth_dev_set_link_up(C.uint16_t(port_id)))
 }
 
 func RteEthDevSetLinkDown(port_id uint) int {
-	return int(C.rte_eth_dev_set_link_down(C.uint8_t(port_id)))
+	return int(C.rte_eth_dev_set_link_down(C.uint16_t(port_id)))
 }
 
 func RteEthDevClose(port_id uint) {
-	C.rte_eth_dev_close(C.uint8_t(C.uint8_t(port_id)))
+	C.rte_eth_dev_close(C.uint16_t(C.uint16_t(port_id)))
 }
 
 func RteEthPromiscuousEnable(port_id uint) {
-	C.rte_eth_promiscuous_enable(C.uint8_t(port_id))
+	C.rte_eth_promiscuous_enable(C.uint16_t(port_id))
 }
 
 func RteEthPromiscuousDisable(port_id uint) {
-	C.rte_eth_promiscuous_disable(C.uint8_t(port_id))
+	C.rte_eth_promiscuous_disable(C.uint16_t(port_id))
 }
 
 func RteEthPromiscuousGet(port_id uint) int {
-	return int(C.rte_eth_promiscuous_get(C.uint8_t(port_id)))
+	return int(C.rte_eth_promiscuous_get(C.uint16_t(port_id)))
 }
 
 func RteEthRxBurst(port_id, queue_id uint, rx_pkts *unsafe.Pointer, nb_pkts uint) uint {
-	return uint(C.rte_eth_rx_burst(C.uint8_t(port_id), C.uint16_t(queue_id),
+	return uint(C.rte_eth_rx_burst(C.uint16_t(port_id), C.uint16_t(queue_id),
 		(**C.struct_rte_mbuf)(unsafe.Pointer(rx_pkts)), C.uint16_t(nb_pkts)))
 }
 
 func RteEthRxQueueCount(port_id, queue_id uint) uint {
-	return uint(C.rte_eth_rx_queue_count(C.uint8_t(port_id),
+	return uint(C.rte_eth_rx_queue_count(C.uint16_t(port_id),
 		C.uint16_t(queue_id)))
 }
 
 func RteEthRxQueueDescriptorDone(port_id, queue_id, offset uint) uint {
-	return uint(C.rte_eth_rx_descriptor_done(C.uint8_t(port_id),
+	return uint(C.rte_eth_rx_descriptor_done(C.uint16_t(port_id),
 		C.uint16_t(queue_id), C.uint16_t(offset)))
 }
 
 func RteEthTxBurst(port_id, queue_id uint, tx_pkts *unsafe.Pointer, nb_pkts uint) uint {
-	return uint(C.rte_eth_tx_burst(C.uint8_t(port_id), C.uint16_t(queue_id),
+	return uint(C.rte_eth_tx_burst(C.uint16_t(port_id), C.uint16_t(queue_id),
 		(**C.struct_rte_mbuf)(unsafe.Pointer(tx_pkts)), C.uint16_t(nb_pkts)))
 }
 
 func RteEthDevSocketID(port_id uint) uint {
-	return uint(C.rte_eth_dev_socket_id(C.uint8_t(port_id)))
+	return uint(C.rte_eth_dev_socket_id(C.uint16_t(port_id)))
 }
 
 func RteEthMacAddr(port_id uint) string {
 	var addr C.struct_ether_addr
-	C.rte_eth_macaddr_get(C.uint8_t(port_id), &addr)
+	C.rte_eth_macaddr_get(C.uint16_t(port_id), &addr)
 	return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", addr.addr_bytes[0], addr.addr_bytes[1], addr.addr_bytes[2], addr.addr_bytes[3], addr.addr_bytes[4], addr.addr_bytes[5])
 }
 
@@ -356,7 +356,7 @@ func RteEthSetRssFlowByTCP(port_id uint) int {
 	conf.rss_hf = C.ETH_RSS_NONFRAG_IPV4_TCP
 	conf.rss_key = (*C.uint8_t)(&C.SYMMETRICAL_HASH_KEY[0])
 
-	result := C.rte_eth_dev_rss_hash_update(C.uint8_t(port_id), conf)
+	result := C.rte_eth_dev_rss_hash_update(C.uint16_t(port_id), conf)
 	return int(result)
 }
 
@@ -402,7 +402,7 @@ func RteEthSetRssFlowByTCPForIntel710(port_id uint) int {
 
 func RteEthInitRetaTable(port_id uint, queues_count uint) int {
 	var dev_info C.struct_rte_eth_dev_info
-	C.rte_eth_dev_info_get(C.uint8_t(port_id), &dev_info)
+	C.rte_eth_dev_info_get(C.uint16_t(port_id), &dev_info)
 
 	var reta_conf [512]C.struct_rte_eth_rss_reta_entry64
 
@@ -417,7 +417,7 @@ func RteEthInitRetaTable(port_id uint, queues_count uint) int {
 	}
 
 	result := C.rte_eth_dev_rss_reta_update(
-		C.uint8_t(port_id),
+		C.uint16_t(port_id),
 		(*C.struct_rte_eth_rss_reta_entry64)(unsafe.Pointer(&reta_conf[0])),
 		dev_info.reta_size,
 	)
@@ -427,7 +427,7 @@ func RteEthInitRetaTable(port_id uint, queues_count uint) int {
 
 func RteEthGetStats(port_id uint) RteEthStats {
 	cstats := C.struct_rte_eth_stats{}
-	C.rte_eth_stats_get(C.uint8_t(port_id), &cstats)
+	C.rte_eth_stats_get(C.uint16_t(port_id), &cstats)
 
 	stats := RteEthStats{
 		PacketsReceived:          uint64(cstats.ipackets),
@@ -444,17 +444,17 @@ func RteEthGetStats(port_id uint) RteEthStats {
 }
 
 func RteEthClearStats(port_id uint) {
-	C.rte_eth_stats_reset(C.uint8_t(port_id))
+	C.rte_eth_stats_reset(C.uint16_t(port_id))
 }
 
 func RteEthDevSetMTU(port_id, mtu uint) int {
-	return int(C.rte_eth_dev_set_mtu(C.uint8_t(port_id), C.uint16_t(mtu)))
+	return int(C.rte_eth_dev_set_mtu(C.uint16_t(port_id), C.uint16_t(mtu)))
 }
 
 func RteEthDevGetNameByPort(port_id uint) (string, int) {
 	var bytes [64]byte
 
-	result := C.rte_eth_dev_get_name_by_port(C.uint8_t(port_id), (*C.char)(unsafe.Pointer(&bytes[0])))
+	result := C.rte_eth_dev_get_name_by_port(C.uint16_t(port_id), (*C.char)(unsafe.Pointer(&bytes[0])))
 
 	if result != 0 {
 		return "", int(result)
