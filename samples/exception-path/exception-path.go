@@ -12,7 +12,7 @@ import (
 )
 
 /*
-#cgo CFLAGS: -m64 -pthread -O3 -march=native -I/usr/local/include/dpdk
+#cgo CFLAGS: -m64 -pthread -O3 -march=native -I/usr/include/dpdk -I/usr/local/include/dpdk
 #cgo LDFLAGS: -L/usr/local/lib -Wl,--whole-archive -ldpdk -lz -Wl,--start-group -lrt -lm -ldl -lfuse -Wl,--end-group -Wl,--no-whole-archive
 #include <rte_common.h>
 #include <rte_config.h>

@@ -1,7 +1,7 @@
 package dpdk
 
 /*
-#cgo CFLAGS: -m64 -pthread -O3 -march=native -I/usr/local/include/dpdk
+#cgo CFLAGS: -m64 -pthread -O3 -march=native -I/usr/include/dpdk -I/usr/local/include/dpdk
 #cgo LDFLAGS: -Wl,--as-needed -L/usr/local/lib -ldpdk -lz -lrt -lm -ldl -lfuse -lpcap
 
 #include <stdint.h>
